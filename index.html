@@ -996,6 +996,76 @@
 
               <!-- Trials Table Container -->
               <div class="p-6">
+                <!-- Admin Export Controls -->
+                <div id="adminExportControls" class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg hidden">
+                  <h4 class="text-lg font-semibold text-blue-800 mb-3">
+                    <i class="fas fa-download mr-2"></i>Admin Export Functions
+                  </h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Full Trial Export -->
+                    <div class="bg-white p-3 rounded border">
+                      <h5 class="font-medium text-gray-800 mb-2">Full Trial Export</h5>
+                      <p class="text-sm text-gray-600 mb-3">Export all trial data including related collections</p>
+                      <div class="space-y-2">
+                        <button id="exportAllTrialsCSV" class="w-full bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition">
+                          <i class="fas fa-file-csv mr-1"></i> CSV Export
+                        </button>
+                        <button id="exportAllTrialsJSON" class="w-full bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition">
+                          <i class="fas fa-file-code mr-1"></i> JSON Export
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Search Results Export -->
+                    <div class="bg-white p-3 rounded border">
+                      <h5 class="font-medium text-gray-800 mb-2">Search Results Export</h5>
+                      <p class="text-sm text-gray-600 mb-3">Export current search/filter results</p>
+                      <div class="space-y-2">
+                        <button id="exportSearchCSV" class="w-full bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition">
+                          <i class="fas fa-file-csv mr-1"></i> CSV Export
+                        </button>
+                        <button id="exportSearchJSON" class="w-full bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition">
+                          <i class="fas fa-file-code mr-1"></i> JSON Export
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Export Options -->
+                    <div class="bg-white p-3 rounded border">
+                      <h5 class="font-medium text-gray-800 mb-2">Export Options</h5>
+                      <div class="space-y-2">
+                        <label class="flex items-center text-sm">
+                          <input type="checkbox" id="includeRelatedData" checked class="mr-2">
+                          Include Related Data
+                        </label>
+                        <label class="flex items-center text-sm">
+                          <input type="checkbox" id="includeAuditTrail" class="mr-2">
+                          Include Audit Trail
+                        </label>
+                        <label class="flex items-center text-sm">
+                          <input type="checkbox" id="includeMetadata" checked class="mr-2">
+                          Include Metadata
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Export Status -->
+                    <div class="bg-white p-3 rounded border">
+                      <h5 class="font-medium text-gray-800 mb-2">Export Status</h5>
+                      <div id="exportStatus" class="text-sm text-gray-600">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Ready to export
+                      </div>
+                      <div id="exportProgress" class="mt-2 hidden">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div id="exportProgressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div id="exportProgressText" class="text-xs text-gray-600 mt-1">Preparing export...</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Search Results will be displayed here -->
                 <div id="searchResults" class="min-h-[150px]">
                   <p class="text-gray-600 italic">Loading trials...</p>
@@ -1096,7 +1166,7 @@
             <input type="text" id="trialSponsor" name="sponsor" placeholder="Sponsor company name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" />
           </div>
           <div class="md:col-span-2">
-            <label class="block font-medium mb-1">Product Tags *</label>
+            <label class="block font-medium mb-1">Product  *</label>
             <div id="productTagsContainer" class="space-y-2">
               <div class="product-tag-selector">
                 <div class="relative">
@@ -1198,8 +1268,13 @@
   <div id="auditTrailModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-7xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-semibold text-blue-900">Audit Trail & Activity Logs</h2>
-        <button id="closeAuditTrailBtn" class="text-gray-600 hover:text-gray-900 text-2xl font-bold">&times;</button>
+        <h2 class="text-2xl font-semibold text-blue-900">Audit Trail & Quality Control</h2>
+        <div class="flex gap-2">
+          <button id="qcAuditBtn" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition text-sm flex items-center gap-2">
+            <i class="fas fa-search"></i> Run QC Audit
+          </button>
+          <button id="closeAuditTrailBtn" class="text-gray-600 hover:text-gray-900 text-2xl font-bold">&times;</button>
+        </div>
       </div>
 
       <!-- Filter Controls -->
@@ -1286,6 +1361,77 @@
           <button id="testAuditLogging" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
             <i class="fas fa-flask mr-2"></i> Test System
           </button>
+        </div>
+      </div>
+
+      <!-- QC Audit Results Section -->
+      <div id="qcResultsSection" class="mb-8 bg-orange-50 p-6 rounded-lg shadow-md hidden">
+        <h3 class="text-xl font-semibold text-orange-900 mb-4">
+          <i class="fas fa-clipboard-check mr-2"></i>Quality Control Audit Results
+        </h3>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <!-- QC Summary Cards -->
+          <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
+            <h4 class="text-lg font-semibold text-red-700 mb-2">Critical Errors</h4>
+            <div class="text-3xl font-bold text-red-600" id="criticalErrorCount">0</div>
+            <p class="text-sm text-gray-600">Spelling, formatting, required fields</p>
+          </div>
+
+          <div class="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500">
+            <h4 class="text-lg font-semibold text-yellow-700 mb-2">Warnings</h4>
+            <div class="text-3xl font-bold text-yellow-600" id="warningCount">0</div>
+            <p class="text-sm text-gray-600">Inconsistencies, recommendations</p>
+          </div>
+
+          <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+            <h4 class="text-lg font-semibold text-green-700 mb-2">QC Score</h4>
+            <div class="text-3xl font-bold text-green-600" id="qcScore">100%</div>
+            <p class="text-sm text-gray-600">Overall data quality</p>
+          </div>
+        </div>
+
+        <!-- QC Filters -->
+        <div class="mb-4 bg-white p-4 rounded-lg shadow">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label for="qcErrorType" class="block font-medium mb-1">Error Type</label>
+              <select id="qcErrorType" class="w-full border border-gray-300 rounded px-3 py-2">
+                <option value="all">All Errors</option>
+                <option value="spelling">Spelling Errors</option>
+                <option value="formatting">Formatting Errors</option>
+                <option value="empty_fields">Empty Fields</option>
+                <option value="validation">Validation Errors</option>
+              </select>
+            </div>
+            <div>
+              <label for="qcSeverity" class="block font-medium mb-1">Severity</label>
+              <select id="qcSeverity" class="w-full border border-gray-300 rounded px-3 py-2">
+                <option value="all">All Severities</option>
+                <option value="critical">Critical</option>
+                <option value="warning">Warning</option>
+                <option value="info">Info</option>
+              </select>
+            </div>
+            <div>
+              <label for="qcTrialFilter" class="block font-medium mb-1">Trial ID</label>
+              <input type="text" id="qcTrialFilter" placeholder="Filter by Trial ID"
+                     class="w-full border border-gray-300 rounded px-3 py-2">
+            </div>
+            <div class="flex items-end">
+              <button id="exportQcReport" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm flex items-center gap-2">
+                <i class="fas fa-download"></i> Export Report
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- QC Results Table -->
+        <div id="qcResultsContainer" class="bg-white rounded-lg shadow overflow-hidden">
+          <div class="p-4 text-center text-gray-500">
+            <i class="fas fa-clipboard-check text-4xl mb-2"></i>
+            <p>Click "Run QC Audit" to start quality control analysis</p>
+          </div>
         </div>
       </div>
 
@@ -2023,9 +2169,9 @@
     // Add debug function to window for manual testing
     window.debugListAllUsers = debugListAllUsers;
 
-    // Simple Page Navigation System - No changes to existing functionality
-    function showPage(pageId) {
-      console.log(`📱 showPage called with pageId: ${pageId}`);
+    // Enhanced Page Navigation System with URL state management
+    function showPage(pageId, trialId = null, updateUrl = true) {
+      console.log(`📱 showPage called with pageId: ${pageId}, trialId: ${trialId}`);
 
       // Hide all main sections
       const searchSection = document.getElementById('search');
@@ -2066,7 +2212,131 @@
         }
       }
 
+      // Update URL and save state if requested
+      if (updateUrl) {
+        updatePageState(pageId, trialId);
+      }
+
       console.log(`✅ Navigated to page: ${pageId}`);
+    }
+
+    // Update URL hash and save page state
+    function updatePageState(pageId, trialId = null) {
+      const state = { page: pageId };
+      if (trialId) {
+        state.trialId = trialId;
+      }
+
+      // Include current tab if on trial details page
+      if (pageId === 'trial-details') {
+        const currentTab = localStorage.getItem('currentTab');
+        if (currentTab) {
+          state.tab = currentTab;
+        }
+      }
+
+      // Save to localStorage for persistence across refreshes
+      localStorage.setItem('currentPageState', JSON.stringify(state));
+
+      // Update URL hash for better UX
+      let hash = `#${pageId}`;
+      if (trialId) {
+        hash += `/${trialId}`;
+        if (state.tab) {
+          hash += `/${state.tab}`;
+        }
+      }
+
+      // Update URL without triggering page reload
+      if (window.location.hash !== hash) {
+        window.history.replaceState(state, '', hash);
+      }
+
+      console.log('📱 Page state updated:', state);
+    }
+
+    // Restore page state from localStorage or URL
+    function restorePageState() {
+      console.log('📱 Restoring page state...');
+
+      // Try to get state from URL hash first
+      let pageId = 'search';
+      let trialId = null;
+      let tabId = null;
+
+      if (window.location.hash) {
+        const hashParts = window.location.hash.substring(1).split('/');
+        pageId = hashParts[0] || 'search';
+        trialId = hashParts[1] || null;
+        tabId = hashParts[2] || null;
+        console.log('📱 State from URL hash:', { pageId, trialId, tabId });
+      } else {
+        // Fallback to localStorage
+        const savedState = localStorage.getItem('currentPageState');
+        if (savedState) {
+          try {
+            const state = JSON.parse(savedState);
+            pageId = state.page || 'search';
+            trialId = state.trialId || null;
+            tabId = state.tab || null;
+            console.log('📱 State from localStorage:', state);
+          } catch (e) {
+            console.log('📱 Error parsing saved state, using default');
+          }
+        }
+      }
+
+      // Validate pageId
+      const validPages = ['search', 'add-trial', 'trial-details'];
+      if (!validPages.includes(pageId)) {
+        pageId = 'search';
+        trialId = null;
+        tabId = null;
+      }
+
+      // Show the page without updating URL (to avoid loops)
+      showPage(pageId, trialId, false);
+
+      // If it's trial details page and we have a trialId, load the trial
+      if (pageId === 'trial-details' && trialId) {
+        setTimeout(() => {
+          loadTrialDetailsById(trialId);
+          // Restore tab if specified
+          if (tabId) {
+            setTimeout(() => {
+              const tabButton = document.querySelector(`[data-tab="${tabId}"]`);
+              if (tabButton) {
+                tabButton.click();
+              }
+            }, 1000);
+          }
+        }, 500);
+      } else if (pageId === 'search') {
+        // Load all trials for search page
+        setTimeout(() => {
+          loadAllTrialsInSearch();
+        }, 500);
+      }
+
+      return { pageId, trialId, tabId };
+    }
+
+    // Helper function to load trial details by ID
+    async function loadTrialDetailsById(trialId) {
+      try {
+        console.log('📱 Loading trial details for ID:', trialId);
+        const docSnapshot = await db.collection('trials').doc(trialId).get();
+        if (docSnapshot.exists) {
+          const trial = docSnapshot.data();
+          await loadTrialDetailsFromFirestore(trial);
+        } else {
+          console.log('❌ Trial not found, redirecting to search');
+          showSearchPage();
+        }
+      } catch (error) {
+        console.error('❌ Error loading trial:', error);
+        showSearchPage();
+      }
     }
 
     // Show search page (default landing page)
@@ -2087,7 +2357,8 @@
 
     // Show trial details page
     function showTrialDetailsPage(trialId) {
-      showPage('trial-details');
+      console.log('📋 showTrialDetailsPage called with trialId:', trialId);
+      showPage('trial-details', trialId);
       // Use existing functionality to load trial details
       if (trialId) {
         // Use the existing loadTrialDetails function if available
@@ -2162,6 +2433,8 @@
 
     // Display trials in table format (reusable function)
     async function displayTrialsInTable(trials, container) {
+      // Update search results for export functionality
+      updateSearchResultsForExport(trials);
       let html = `
         <div class="mb-4 flex justify-between items-center">
           <h4 class="text-lg font-semibold text-blue-800">📊 Clinical Trials (${trials.length} trials)</h4>
@@ -2184,7 +2457,7 @@
                 <th class="px-2 py-1 text-left">Study Type</th>
                 <th class="px-2 py-1 text-left">Status</th>
                 <th class="px-2 py-1 text-left">Sponsor</th>
-                <th class="px-2 py-1 text-left">Product Tags</th>
+                <th class="px-2 py-1 text-left">Product</th>
                 <th class="px-2 py-1 text-left">Allocation</th>
                 <th class="px-2 py-1 text-left">Start Date</th>
                 <th class="px-2 py-1 text-left">End Date</th>
@@ -2724,10 +2997,11 @@
       // Set up existing form redirects
       setupFormRedirects();
 
-      // Show search page by default after login
+      // Restore previous page state or show search page by default after login
       setTimeout(() => {
         if (localStorage.getItem('isLoggedIn') === 'true') {
-          showSearchPage();
+          const restoredState = restorePageState();
+          console.log('📱 Page state restored:', restoredState);
         }
       }, 1000);
 
@@ -3544,10 +3818,24 @@
       if (currentUser.role === 'admin') {
         userManagementBtn.classList.remove('hidden');
         auditTrailBtn.classList.remove('hidden');
-        console.log('Admin access granted - User Management and Audit Trail buttons visible');
+
+        // Show admin export controls
+        const adminExportControls = document.getElementById('adminExportControls');
+        if (adminExportControls) {
+          adminExportControls.classList.remove('hidden');
+        }
+
+        console.log('Admin access granted - User Management, Audit Trail, and Export features visible');
       } else {
         userManagementBtn.classList.add('hidden');
         auditTrailBtn.classList.add('hidden');
+
+        // Hide admin export controls
+        const adminExportControls = document.getElementById('adminExportControls');
+        if (adminExportControls) {
+          adminExportControls.classList.add('hidden');
+        }
+
         console.log('Non-admin user - Admin buttons hidden');
       }
     }
@@ -3663,7 +3951,7 @@
 
     // Removed old dynamic field addition code for simplified search form
 
-    // Add Product Tag searchable dropdown dynamically (Add Trial Form)
+    // Add Product searchable dropdown dynamically (Add Trial Form)
     const addProductTagBtn = document.getElementById('addProductTagBtn');
     const productTagsContainer = document.getElementById('productTagsContainer');
     addProductTagBtn.addEventListener('click', async () => {
@@ -3742,9 +4030,9 @@
         if (val) product_tags.push(val);
       });
 
-      // Validate mandatory field: Product Tags
+      // Validate mandatory field: Product
       if (product_tags.length === 0) {
-        showMessage('addTrialMessage', 'At least one product tag is required.', true);
+        showMessage('addTrialMessage', 'At least one product is required.', true);
         return;
       }
 
@@ -3841,7 +4129,7 @@
         `;
         addIndicationsContainer.appendChild(firstIndicationSelector);
 
-        // Reset product tags container with searchable dropdown
+        // Reset product container with searchable dropdown
         productTagsContainer.innerHTML = '';
         const firstProductSelector = document.createElement('div');
         firstProductSelector.className = 'product-tag-selector';
@@ -4016,7 +4304,7 @@ async function loadTrialDetailsFromFirestore(trial) {
     <div><strong>Study Type:</strong> ${trial.study_type || 'N/A'}</div>
     <div><strong>Status:</strong> ${trial.status || 'N/A'}</div>
     <div><strong>Sponsor:</strong> ${trial.sponsor || 'N/A'}</div>
-    <div><strong>Product Tags:</strong> ${trial.product_tags && trial.product_tags.length ? trial.product_tags.join(', ') : 'N/A'}</div>
+    <div><strong>Product:</strong> ${trial.product_tags && trial.product_tags.length ? trial.product_tags.join(', ') : 'N/A'}</div>
     <div><strong>Biomarkers:</strong> ${trial.biomarkers && Array.isArray(trial.biomarkers) && trial.biomarkers.length ? trial.biomarkers.join(', ') : 'N/A'}</div>
     <div><strong>Allocation:</strong> ${trial.allocation || 'N/A'}</div>
     <div><strong>Start Date:</strong> ${trial.start_date || 'N/A'}</div>
@@ -4084,6 +4372,19 @@ async function loadTrialDetails(trialId) {
 
       // Save current tab to localStorage
       localStorage.setItem('currentTab', tab);
+
+      // Update page state to include current tab
+      const currentPageState = localStorage.getItem('currentPageState');
+      if (currentPageState) {
+        try {
+          const state = JSON.parse(currentPageState);
+          if (state.page === 'trial-details' && state.trialId) {
+            updatePageState(state.page, state.trialId);
+          }
+        } catch (e) {
+          console.log('📱 Error updating page state with tab');
+        }
+      }
 
       await loadTabContent(tab);
     });
@@ -4385,18 +4686,19 @@ async function loadTrialDetails(trialId) {
               <label class="block font-medium mb-1">Indication(s)</label>
               <div id="summaryIndicationsContainer" class="space-y-2">
                 ${(trial.indication && Array.isArray(trial.indication) && trial.indication.length > 0 ? trial.indication : ['']).map((indication, index) =>
-                  `<div class="flex gap-2 items-center indication-selector-summary">
+                  `<div class="flex gap-2 items-center indication-selector-summary bg-blue-50 border border-blue-200 rounded-lg p-2">
                     <div class="relative flex-1">
                       <input type="text" name="indication_search" value="${indication}" placeholder="Search or type indication..."
-                             class="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 indication-search-input" />
+                             class="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 indication-search-input bg-white" />
                       <button type="button" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 dropdown-toggle">
                         <i class="fas fa-chevron-down"></i>
                       </button>
-                      <div class="dropdown-list hidden absolute z-10 w-full bg-white border border-gray-300 rounded-b max-h-40 overflow-y-auto shadow-lg">
+                      <div class="dropdown-list hidden absolute z-20 w-full bg-white border border-gray-300 rounded-b max-h-40 overflow-y-auto shadow-lg">
                         <!-- Options will be loaded here -->
                       </div>
                     </div>
                     <input type="hidden" name="indication" value="${indication}" />
+                    ${indication ? '<span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded"><i class="fas fa-tag"></i></span>' : ''}
                     ${index > 0 ? '<button type="button" class="remove-indication bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"><i class="fas fa-times"></i></button>' : ''}
                   </div>`
                 ).join('')}
@@ -4406,40 +4708,49 @@ async function loadTrialDetails(trialId) {
               </button>
             </div>
 
-            <!-- Product Tags -->
+            <!-- Product -->
             <div class="md:col-span-3">
-              <label class="block font-medium mb-1">Product Tags</label>
+              <label class="block font-medium mb-1">Product</label>
               <div id="summaryProductTagsContainer" class="space-y-2">
                 ${(trial.product_tags && Array.isArray(trial.product_tags) && trial.product_tags.length > 0 ? trial.product_tags : ['']).map((product, index) =>
-                  `<div class="flex gap-2 items-center product-tag-selector-summary">
+                  `<div class="flex gap-2 items-center product-tag-selector-summary bg-green-50 border border-green-200 rounded-lg p-2">
                     <div class="relative flex-1">
                       <input type="text" name="product_tag_search" value="${product}" placeholder="Search or type product name..."
-                             class="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 product-search-input" />
+                             class="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 product-search-input bg-white" />
                       <button type="button" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 dropdown-toggle">
                         <i class="fas fa-chevron-down"></i>
                       </button>
-                      <div class="dropdown-list hidden absolute z-10 w-full bg-white border border-gray-300 rounded-b max-h-40 overflow-y-auto shadow-lg">
+                      <div class="dropdown-list hidden absolute z-20 w-full bg-white border border-gray-300 rounded-b max-h-40 overflow-y-auto shadow-lg">
                         <!-- Options will be loaded here -->
                       </div>
                     </div>
                     <input type="hidden" name="product_tags" value="${product}" />
+                    ${product ? '<span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded"><i class="fas fa-tag"></i></span>' : ''}
                     ${index > 0 ? '<button type="button" class="remove-product-tag bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"><i class="fas fa-times"></i></button>' : ''}
                   </div>`
                 ).join('')}
               </div>
               <button type="button" id="addProductTagSummary" class="mt-2 text-green-600 hover:text-green-800 text-sm flex items-center gap-1">
-                <i class="fas fa-plus"></i> Add Another Product Tag
+                <i class="fas fa-plus"></i> Add Another Product
               </button>
             </div>
 
             <!-- Biomarkers -->
             <div class="md:col-span-3">
               <label class="block font-medium mb-1">Biomarkers</label>
-              <div id="summaryBiomarkersContainer" class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                ${(trial.biomarkers && Array.isArray(trial.biomarkers) ? trial.biomarkers : ['']).map(biomarker =>
-                  `<input type="text" name="biomarkers" value="${biomarker}" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600" />`
+              <div id="summaryBiomarkersContainer" class="space-y-2">
+                ${(trial.biomarkers && Array.isArray(trial.biomarkers) && trial.biomarkers.length > 0 ? trial.biomarkers : ['']).map((biomarker, index) =>
+                  `<div class="flex gap-2 items-center biomarker-field-summary bg-purple-50 border border-purple-200 rounded-lg p-2">
+                    <input type="text" name="biomarkers" value="${biomarker}" placeholder="Enter biomarker name..."
+                           class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white" />
+                    <span class="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded biomarker-indicator ${biomarker ? '' : 'hidden'}"><i class="fas fa-dna"></i></span>
+                    ${index > 0 ? '<button type="button" class="remove-biomarker bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"><i class="fas fa-times"></i></button>' : ''}
+                  </div>`
                 ).join('')}
               </div>
+              <button type="button" id="addBiomarkerSummary" class="mt-2 text-green-600 hover:text-green-800 text-sm flex items-center gap-1">
+                <i class="fas fa-plus"></i> Add Another Biomarker
+              </button>
             </div>
 
             <!-- Save button (always visible) -->
@@ -4549,14 +4860,22 @@ async function loadTrialDetails(trialId) {
 
     // Setup dynamic field functionality for summary tab
     async function setupSummaryDynamicFields() {
-      // Initialize existing searchable dropdowns
-      document.querySelectorAll('.indication-selector-summary').forEach(selector => {
-        initializeIndicationDropdown(selector);
-      });
+      console.log('🔧 Setting up summary dynamic fields...');
 
-      document.querySelectorAll('.product-tag-selector-summary').forEach(selector => {
-        initializeProductDropdown(selector);
-      });
+      // Initialize existing searchable dropdowns with proper async handling
+      const indicationSelectors = document.querySelectorAll('.indication-selector-summary');
+      console.log(`Found ${indicationSelectors.length} indication selectors`);
+      for (const selector of indicationSelectors) {
+        await initializeIndicationDropdown(selector);
+      }
+
+      const productSelectors = document.querySelectorAll('.product-tag-selector-summary');
+      console.log(`Found ${productSelectors.length} product selectors`);
+      for (const selector of productSelectors) {
+        await initializeProductDropdown(selector);
+      }
+
+      console.log('✅ Summary dynamic fields setup complete');
 
       // Add Other Study ID
       const addOtherStudyIdBtn = document.getElementById('addOtherStudyIdSummary');
@@ -4587,19 +4906,20 @@ async function loadTrialDetails(trialId) {
         addIndicationBtn.addEventListener('click', async () => {
           const container = document.getElementById('summaryIndicationsContainer');
           const newField = document.createElement('div');
-          newField.className = 'flex gap-2 items-center indication-selector-summary';
+          newField.className = 'flex gap-2 items-center indication-selector-summary bg-blue-50 border border-blue-200 rounded-lg p-2';
           newField.innerHTML = `
             <div class="relative flex-1">
               <input type="text" name="indication_search" value="" placeholder="Search or type indication..."
-                     class="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 indication-search-input" />
+                     class="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 indication-search-input bg-white" />
               <button type="button" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 dropdown-toggle">
                 <i class="fas fa-chevron-down"></i>
               </button>
-              <div class="dropdown-list hidden absolute z-10 w-full bg-white border border-gray-300 rounded-b max-h-40 overflow-y-auto shadow-lg">
+              <div class="dropdown-list hidden absolute z-20 w-full bg-white border border-gray-300 rounded-b max-h-40 overflow-y-auto shadow-lg">
                 <!-- Options will be loaded here -->
               </div>
             </div>
             <input type="hidden" name="indication" value="" />
+            <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded hidden tag-indicator"><i class="fas fa-tag"></i></span>
             <button type="button" class="remove-indication bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
               <i class="fas fa-times"></i>
             </button>
@@ -4616,25 +4936,26 @@ async function loadTrialDetails(trialId) {
         });
       }
 
-      // Add Product Tag
+      // Add Product
       const addProductTagBtn = document.getElementById('addProductTagSummary');
       if (addProductTagBtn) {
         addProductTagBtn.addEventListener('click', async () => {
           const container = document.getElementById('summaryProductTagsContainer');
           const newField = document.createElement('div');
-          newField.className = 'flex gap-2 items-center product-tag-selector-summary';
+          newField.className = 'flex gap-2 items-center product-tag-selector-summary bg-green-50 border border-green-200 rounded-lg p-2';
           newField.innerHTML = `
             <div class="relative flex-1">
               <input type="text" name="product_tag_search" value="" placeholder="Search or type product name..."
-                     class="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 product-search-input" />
+                     class="w-full border border-gray-300 rounded px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 product-search-input bg-white" />
               <button type="button" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600 dropdown-toggle">
                 <i class="fas fa-chevron-down"></i>
               </button>
-              <div class="dropdown-list hidden absolute z-10 w-full bg-white border border-gray-300 rounded-b max-h-40 overflow-y-auto shadow-lg">
+              <div class="dropdown-list hidden absolute z-20 w-full bg-white border border-gray-300 rounded-b max-h-40 overflow-y-auto shadow-lg">
                 <!-- Options will be loaded here -->
               </div>
             </div>
             <input type="hidden" name="product_tags" value="" />
+            <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded hidden tag-indicator"><i class="fas fa-tag"></i></span>
             <button type="button" class="remove-product-tag bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
               <i class="fas fa-times"></i>
             </button>
@@ -4647,6 +4968,41 @@ async function loadTrialDetails(trialId) {
           // Add remove functionality
           newField.querySelector('.remove-product-tag').addEventListener('click', () => {
             newField.remove();
+          });
+        });
+      }
+
+      // Add Biomarker
+      const addBiomarkerBtn = document.getElementById('addBiomarkerSummary');
+      if (addBiomarkerBtn) {
+        addBiomarkerBtn.addEventListener('click', () => {
+          const container = document.getElementById('summaryBiomarkersContainer');
+          const newField = document.createElement('div');
+          newField.className = 'flex gap-2 items-center biomarker-field-summary bg-purple-50 border border-purple-200 rounded-lg p-2';
+          newField.innerHTML = `
+            <input type="text" name="biomarkers" value="" placeholder="Enter biomarker name..."
+                   class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 bg-white" />
+            <span class="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded hidden biomarker-indicator"><i class="fas fa-dna"></i></span>
+            <button type="button" class="remove-biomarker bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">
+              <i class="fas fa-times"></i>
+            </button>
+          `;
+          container.appendChild(newField);
+
+          // Add remove functionality
+          newField.querySelector('.remove-biomarker').addEventListener('click', () => {
+            newField.remove();
+          });
+
+          // Add input event listener to show/hide biomarker indicator
+          const input = newField.querySelector('input[name="biomarkers"]');
+          const indicator = newField.querySelector('.biomarker-indicator');
+          input.addEventListener('input', () => {
+            if (input.value.trim()) {
+              indicator.classList.remove('hidden');
+            } else {
+              indicator.classList.add('hidden');
+            }
           });
         });
       }
@@ -4668,6 +5024,32 @@ async function loadTrialDetails(trialId) {
         btn.addEventListener('click', (e) => {
           e.target.closest('.flex').remove();
         });
+      });
+
+      document.querySelectorAll('.remove-biomarker').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.target.closest('.flex').remove();
+        });
+      });
+
+      // Add input event listeners for existing biomarker fields to show/hide indicators
+      document.querySelectorAll('.biomarker-field-summary input[name="biomarkers"]').forEach(input => {
+        const indicator = input.closest('.biomarker-field-summary').querySelector('.biomarker-indicator');
+        if (indicator) {
+          // Show indicator if field has value
+          if (input.value.trim()) {
+            indicator.classList.remove('hidden');
+          }
+
+          // Add input event listener
+          input.addEventListener('input', () => {
+            if (input.value.trim()) {
+              indicator.classList.remove('hidden');
+            } else {
+              indicator.classList.add('hidden');
+            }
+          });
+        }
       });
     }
 
@@ -9033,6 +9415,1138 @@ async function loadTrialDetails(trialId) {
       });
     }
 
+    // === QUALITY CONTROL AUDIT FUNCTIONS ===
+
+    // Medical and pharmaceutical dictionary for spell checking
+    const MEDICAL_DICTIONARY = [
+      // Common medical terms
+      'oncology', 'hematology', 'cardiology', 'neurology', 'dermatology', 'gastroenterology',
+      'immunotherapy', 'chemotherapy', 'radiotherapy', 'biomarker', 'biomarkers',
+      'efficacy', 'safety', 'tolerability', 'pharmacokinetics', 'pharmacodynamics',
+      'adverse', 'events', 'serious', 'grade', 'toxicity', 'toxicities',
+      'progression', 'survival', 'response', 'remission', 'relapse', 'recurrence',
+      'metastatic', 'metastasis', 'tumor', 'tumors', 'cancer', 'malignancy',
+      'therapeutic', 'treatment', 'therapy', 'intervention', 'protocol',
+      'randomized', 'controlled', 'blinded', 'placebo', 'crossover',
+      'endpoint', 'endpoints', 'primary', 'secondary', 'exploratory',
+      'inclusion', 'exclusion', 'criteria', 'eligibility', 'enrollment',
+      'demographics', 'baseline', 'characteristics', 'population',
+      'dosage', 'administration', 'infusion', 'injection', 'oral',
+      'intravenous', 'subcutaneous', 'intramuscular', 'topical',
+      // Drug classes and types
+      'monoclonal', 'antibody', 'antibodies', 'inhibitor', 'inhibitors',
+      'agonist', 'antagonist', 'receptor', 'kinase', 'enzyme',
+      'checkpoint', 'targeted', 'precision', 'personalized',
+      // Common abbreviations
+      'ecog', 'karnofsky', 'who', 'fda', 'ema', 'ich', 'gcp',
+      'auc', 'cmax', 'tmax', 'clearance', 'bioavailability',
+      'ctcae', 'recist', 'irrecist', 'immune', 'related'
+    ];
+
+    // QC Error types and severity levels
+    const QC_ERROR_TYPES = {
+      SPELLING: 'spelling',
+      FORMATTING: 'formatting',
+      EMPTY_FIELD: 'empty_fields',
+      VALIDATION: 'validation',
+      CONSISTENCY: 'consistency'
+    };
+
+    const QC_SEVERITY = {
+      CRITICAL: 'critical',
+      WARNING: 'warning',
+      INFO: 'info'
+    };
+
+    // Main QC audit function
+    async function runQCAudit() {
+      console.log('🔍 Starting QC Audit...');
+
+      try {
+        // Show loading state
+        document.getElementById('qcResultsSection').classList.remove('hidden');
+        document.getElementById('qcResultsContainer').innerHTML = `
+          <div class="p-8 text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Running quality control audit...</p>
+          </div>
+        `;
+
+        // Get all trial data for QC analysis
+        const trialsSnapshot = await db.collection('trials').get();
+        const qcResults = [];
+        let totalErrors = 0;
+        let totalWarnings = 0;
+
+        for (const doc of trialsSnapshot.docs) {
+          const trial = doc.data();
+          const trialId = doc.id;
+
+          console.log(`🔍 Auditing trial: ${trialId}`);
+
+          // Run QC checks on this trial
+          const trialQcResults = await auditTrialData(trialId, trial);
+          qcResults.push(...trialQcResults);
+
+          // Count errors and warnings
+          trialQcResults.forEach(result => {
+            if (result.severity === QC_SEVERITY.CRITICAL) totalErrors++;
+            else if (result.severity === QC_SEVERITY.WARNING) totalWarnings++;
+          });
+        }
+
+        // Calculate QC score
+        const totalIssues = totalErrors + totalWarnings;
+        const qcScore = totalIssues === 0 ? 100 : Math.max(0, 100 - (totalErrors * 5) - (totalWarnings * 2));
+
+        // Update summary cards
+        document.getElementById('criticalErrorCount').textContent = totalErrors;
+        document.getElementById('warningCount').textContent = totalWarnings;
+        document.getElementById('qcScore').textContent = `${qcScore.toFixed(1)}%`;
+
+        // Store results for export
+        storeQCResults(qcResults);
+
+        // Display results
+        displayQCResults(qcResults);
+
+        // Log QC audit completion
+        await logAuditTrail('QC_AUDIT', 'system', 'qc_audit_' + Date.now(), null, {
+          total_trials_audited: trialsSnapshot.size,
+          total_errors: totalErrors,
+          total_warnings: totalWarnings,
+          qc_score: qcScore
+        }, {
+          audit_type: 'quality_control',
+          system_action: true
+        });
+
+        console.log(`✅ QC Audit completed. Errors: ${totalErrors}, Warnings: ${totalWarnings}, Score: ${qcScore}%`);
+
+      } catch (error) {
+        console.error('❌ Error running QC audit:', error);
+        document.getElementById('qcResultsContainer').innerHTML = `
+          <div class="p-8 text-center text-red-600">
+            <i class="fas fa-exclamation-triangle text-4xl mb-2"></i>
+            <p>Error running QC audit: ${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Audit individual trial data
+    async function auditTrialData(trialId, trial) {
+      const qcResults = [];
+
+      // 1. Check required fields
+      qcResults.push(...checkRequiredFields(trialId, trial));
+
+      // 2. Check spelling in text fields
+      qcResults.push(...checkSpelling(trialId, trial));
+
+      // 3. Check formatting
+      qcResults.push(...checkFormatting(trialId, trial));
+
+      // 4. Check data consistency
+      qcResults.push(...checkDataConsistency(trialId, trial));
+
+      // 5. Check related collections (ARMs, demographics, etc.)
+      const relatedResults = await checkRelatedCollections(trialId);
+      qcResults.push(...relatedResults);
+
+      return qcResults;
+    }
+
+    // Check required fields
+    function checkRequiredFields(trialId, trial) {
+      const results = [];
+      const requiredFields = [
+        { field: 'id', label: 'Trial ID' },
+        { field: 'title', label: 'Trial Title' },
+        { field: 'phase', label: 'Phase' },
+        { field: 'status', label: 'Status' },
+        { field: 'indication', label: 'Indication(s)' },
+        { field: 'product_tags', label: 'Product' },
+        { field: 'sponsor', label: 'Sponsor' }
+      ];
+
+      requiredFields.forEach(({ field, label }) => {
+        const value = trial[field];
+        if (!value || (Array.isArray(value) && value.length === 0) ||
+            (typeof value === 'string' && value.trim() === '')) {
+          results.push({
+            trial_id: trialId,
+            error_type: QC_ERROR_TYPES.EMPTY_FIELD,
+            severity: QC_SEVERITY.CRITICAL,
+            field: field,
+            message: `Required field "${label}" is empty`,
+            location: 'Trial Details',
+            suggestion: `Please provide a value for ${label}`
+          });
+        }
+      });
+
+      return results;
+    }
+
+    // Check spelling in text fields
+    function checkSpelling(trialId, trial) {
+      const results = [];
+      const textFields = [
+        { field: 'title', label: 'Trial Title' },
+        { field: 'description', label: 'Description' },
+        { field: 'primary_endpoint', label: 'Primary Endpoint' },
+        { field: 'secondary_endpoint', label: 'Secondary Endpoint' }
+      ];
+
+      textFields.forEach(({ field, label }) => {
+        const text = trial[field];
+        if (text && typeof text === 'string') {
+          const spellingErrors = findSpellingErrors(text);
+          spellingErrors.forEach(error => {
+            results.push({
+              trial_id: trialId,
+              error_type: QC_ERROR_TYPES.SPELLING,
+              severity: QC_SEVERITY.WARNING,
+              field: field,
+              message: `Possible spelling error: "${error.word}"`,
+              location: label,
+              suggestion: error.suggestions.length > 0 ?
+                `Did you mean: ${error.suggestions.join(', ')}?` :
+                'Please check spelling'
+            });
+          });
+        }
+      });
+
+      return results;
+    }
+
+    // Find spelling errors in text
+    function findSpellingErrors(text) {
+      const errors = [];
+      const words = text.toLowerCase().match(/\b[a-z]+\b/g) || [];
+
+      words.forEach(word => {
+        // Skip short words and numbers
+        if (word.length < 3 || /^\d+$/.test(word)) return;
+
+        // Check against medical dictionary and common words
+        if (!isWordValid(word)) {
+          const suggestions = getSuggestions(word);
+          errors.push({
+            word: word,
+            suggestions: suggestions
+          });
+        }
+      });
+
+      return errors;
+    }
+
+    // Check if word is valid (simplified spell check)
+    function isWordValid(word) {
+      // Check medical dictionary
+      if (MEDICAL_DICTIONARY.includes(word)) return true;
+
+      // Check common English words (simplified list)
+      const commonWords = [
+        'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'had', 'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'how', 'man', 'new', 'now', 'old', 'see', 'two', 'way', 'who', 'boy', 'did', 'its', 'let', 'put', 'say', 'she', 'too', 'use',
+        'with', 'have', 'this', 'will', 'your', 'from', 'they', 'know', 'want', 'been', 'good', 'much', 'some', 'time', 'very', 'when', 'come', 'here', 'just', 'like', 'long', 'make', 'many', 'over', 'such', 'take', 'than', 'them', 'well', 'were',
+        'study', 'trial', 'patient', 'patients', 'treatment', 'drug', 'dose', 'group', 'control', 'placebo', 'week', 'weeks', 'month', 'months', 'year', 'years', 'data', 'analysis', 'result', 'results', 'effect', 'effects', 'clinical', 'medical', 'health', 'care'
+      ];
+
+      return commonWords.includes(word);
+    }
+
+    // Get spelling suggestions (simplified)
+    function getSuggestions(word) {
+      const suggestions = [];
+
+      // Check for close matches in medical dictionary
+      MEDICAL_DICTIONARY.forEach(dictWord => {
+        if (getLevenshteinDistance(word, dictWord) <= 2 && dictWord.length > 3) {
+          suggestions.push(dictWord);
+        }
+      });
+
+      return suggestions.slice(0, 3); // Return top 3 suggestions
+    }
+
+    // Calculate Levenshtein distance for spell checking
+    function getLevenshteinDistance(str1, str2) {
+      const matrix = [];
+
+      for (let i = 0; i <= str2.length; i++) {
+        matrix[i] = [i];
+      }
+
+      for (let j = 0; j <= str1.length; j++) {
+        matrix[0][j] = j;
+      }
+
+      for (let i = 1; i <= str2.length; i++) {
+        for (let j = 1; j <= str1.length; j++) {
+          if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+            matrix[i][j] = matrix[i - 1][j - 1];
+          } else {
+            matrix[i][j] = Math.min(
+              matrix[i - 1][j - 1] + 1,
+              matrix[i][j - 1] + 1,
+              matrix[i - 1][j] + 1
+            );
+          }
+        }
+      }
+
+      return matrix[str2.length][str1.length];
+    }
+
+    // Check formatting errors
+    function checkFormatting(trialId, trial) {
+      const results = [];
+
+      // Check date formats
+      const dateFields = ['start_date', 'end_date', 'last_updated_at', 'created_at'];
+      dateFields.forEach(field => {
+        const value = trial[field];
+        if (value && !isValidDate(value)) {
+          results.push({
+            trial_id: trialId,
+            error_type: QC_ERROR_TYPES.FORMATTING,
+            severity: QC_SEVERITY.WARNING,
+            field: field,
+            message: `Invalid date format: "${value}"`,
+            location: 'Trial Details',
+            suggestion: 'Use format: YYYY-MM-DD or valid ISO date string'
+          });
+        }
+      });
+
+      // Check URL formats
+      const urlFields = ['source_link', 'protocol_link'];
+      urlFields.forEach(field => {
+        const value = trial[field];
+        if (value && !isValidURL(value)) {
+          results.push({
+            trial_id: trialId,
+            error_type: QC_ERROR_TYPES.FORMATTING,
+            severity: QC_SEVERITY.WARNING,
+            field: field,
+            message: `Invalid URL format: "${value}"`,
+            location: 'Trial Details',
+            suggestion: 'URL should start with http:// or https://'
+          });
+        }
+      });
+
+      // Check trial ID format
+      if (trial.id && !/^[A-Z0-9_-]+$/i.test(trial.id)) {
+        results.push({
+          trial_id: trialId,
+          error_type: QC_ERROR_TYPES.FORMATTING,
+          severity: QC_SEVERITY.WARNING,
+          field: 'id',
+          message: `Trial ID contains special characters: "${trial.id}"`,
+          location: 'Trial Details',
+          suggestion: 'Use only letters, numbers, hyphens, and underscores'
+        });
+      }
+
+      return results;
+    }
+
+    // Check data consistency
+    function checkDataConsistency(trialId, trial) {
+      const results = [];
+
+      // Check if phase and status are consistent
+      if (trial.phase === 'Phase IV' && trial.status === 'Planning') {
+        results.push({
+          trial_id: trialId,
+          error_type: QC_ERROR_TYPES.CONSISTENCY,
+          severity: QC_SEVERITY.WARNING,
+          field: 'phase_status',
+          message: 'Phase IV trial marked as Planning status',
+          location: 'Trial Details',
+          suggestion: 'Phase IV trials are typically post-marketing studies'
+        });
+      }
+
+      // Check if completed trials have end dates
+      if (trial.status === 'Completed' && !trial.end_date) {
+        results.push({
+          trial_id: trialId,
+          error_type: QC_ERROR_TYPES.CONSISTENCY,
+          severity: QC_SEVERITY.WARNING,
+          field: 'end_date',
+          message: 'Completed trial missing end date',
+          location: 'Trial Details',
+          suggestion: 'Add end date for completed trials'
+        });
+      }
+
+      // Check if start date is before end date
+      if (trial.start_date && trial.end_date) {
+        const startDate = new Date(trial.start_date);
+        const endDate = new Date(trial.end_date);
+        if (startDate > endDate) {
+          results.push({
+            trial_id: trialId,
+            error_type: QC_ERROR_TYPES.CONSISTENCY,
+            severity: QC_SEVERITY.CRITICAL,
+            field: 'date_range',
+            message: 'Start date is after end date',
+            location: 'Trial Details',
+            suggestion: 'Verify and correct the trial dates'
+          });
+        }
+      }
+
+      return results;
+    }
+
+    // Check related collections (ARMs, demographics, etc.)
+    async function checkRelatedCollections(trialId) {
+      const results = [];
+
+      try {
+        // Check if trial has ARMs
+        const armsSnapshot = await db.collection('trial_arms').where('trial_id', '==', trialId).get();
+        if (armsSnapshot.empty) {
+          results.push({
+            trial_id: trialId,
+            error_type: QC_ERROR_TYPES.EMPTY_FIELD,
+            severity: QC_SEVERITY.WARNING,
+            field: 'trial_arms',
+            message: 'Trial has no ARM data',
+            location: 'ARM Tab',
+            suggestion: 'Add at least one trial ARM'
+          });
+        }
+
+        // Check ARM data quality
+        armsSnapshot.forEach(doc => {
+          const arm = doc.data();
+          if (!arm.arm_type || arm.arm_type.trim() === '') {
+            results.push({
+              trial_id: trialId,
+              error_type: QC_ERROR_TYPES.EMPTY_FIELD,
+              severity: QC_SEVERITY.CRITICAL,
+              field: 'arm_type',
+              message: 'ARM missing type',
+              location: 'ARM Tab',
+              suggestion: 'Specify ARM type (e.g., Experimental, Control)'
+            });
+          }
+        });
+
+        // Check demographics data
+        const demoSnapshot = await db.collection('patient_demographics').where('trial_id', '==', trialId).get();
+        if (demoSnapshot.empty) {
+          results.push({
+            trial_id: trialId,
+            error_type: QC_ERROR_TYPES.EMPTY_FIELD,
+            severity: QC_SEVERITY.WARNING,
+            field: 'demographics',
+            message: 'Trial has no patient demographics',
+            location: 'Demographics Tab',
+            suggestion: 'Add patient demographic information'
+          });
+        }
+
+      } catch (error) {
+        console.error('Error checking related collections:', error);
+      }
+
+      return results;
+    }
+
+    // Validation helper functions
+    function isValidDate(dateString) {
+      if (!dateString) return false;
+      const date = new Date(dateString);
+      return date instanceof Date && !isNaN(date);
+    }
+
+    function isValidURL(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    // Display QC results in the UI
+    function displayQCResults(qcResults) {
+      const container = document.getElementById('qcResultsContainer');
+
+      if (!qcResults || qcResults.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-green-600">
+            <i class="fas fa-check-circle text-4xl mb-2"></i>
+            <p class="text-lg font-semibold">No issues found!</p>
+            <p class="text-sm text-gray-600">All trials passed quality control checks.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Group results by trial
+      const groupedResults = {};
+      qcResults.forEach(result => {
+        if (!groupedResults[result.trial_id]) {
+          groupedResults[result.trial_id] = [];
+        }
+        groupedResults[result.trial_id].push(result);
+      });
+
+      let html = `
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trial ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Error Type</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Severity</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Field</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Suggestion</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+      `;
+
+      qcResults.forEach(result => {
+        const severityClass = getSeverityClass(result.severity);
+        const errorTypeIcon = getErrorTypeIcon(result.error_type);
+
+        html += `
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+              <a href="#" onclick="openTrialFromQC('${result.trial_id}')" class="hover:underline">
+                ${result.trial_id}
+              </a>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <span class="inline-flex items-center gap-1">
+                ${errorTypeIcon}
+                ${formatErrorType(result.error_type)}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${severityClass}">
+                ${result.severity.toUpperCase()}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${result.field}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${result.message}</td>
+            <td class="px-6 py-4 text-sm text-gray-600">${result.suggestion}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // Helper functions for QC display
+    function getSeverityClass(severity) {
+      switch (severity) {
+        case QC_SEVERITY.CRITICAL:
+          return 'bg-red-100 text-red-800';
+        case QC_SEVERITY.WARNING:
+          return 'bg-yellow-100 text-yellow-800';
+        case QC_SEVERITY.INFO:
+          return 'bg-blue-100 text-blue-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    }
+
+    function getErrorTypeIcon(errorType) {
+      switch (errorType) {
+        case QC_ERROR_TYPES.SPELLING:
+          return '<i class="fas fa-spell-check text-purple-600"></i>';
+        case QC_ERROR_TYPES.FORMATTING:
+          return '<i class="fas fa-align-left text-blue-600"></i>';
+        case QC_ERROR_TYPES.EMPTY_FIELD:
+          return '<i class="fas fa-exclamation-circle text-red-600"></i>';
+        case QC_ERROR_TYPES.VALIDATION:
+          return '<i class="fas fa-check-circle text-green-600"></i>';
+        case QC_ERROR_TYPES.CONSISTENCY:
+          return '<i class="fas fa-balance-scale text-orange-600"></i>';
+        default:
+          return '<i class="fas fa-question-circle text-gray-600"></i>';
+      }
+    }
+
+    function formatErrorType(errorType) {
+      return errorType.split('_').map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+    }
+
+    // Open trial from QC results
+    function openTrialFromQC(trialId) {
+      // Close audit modal
+      document.getElementById('auditTrailModal').classList.add('hidden');
+
+      // Navigate to trial details
+      showTrialDetailsPage(trialId);
+    }
+
+    // Filter QC results
+    function filterQCResults() {
+      const errorType = document.getElementById('qcErrorType').value;
+      const severity = document.getElementById('qcSeverity').value;
+      const trialFilter = document.getElementById('qcTrialFilter').value.toLowerCase();
+
+      // This would filter the displayed results
+      // Implementation depends on stored QC results
+      console.log('Filtering QC results:', { errorType, severity, trialFilter });
+    }
+
+    // Export QC report
+    function exportQCReport() {
+      console.log('📊 Exporting QC report...');
+
+      if (!window.currentQCResults || window.currentQCResults.length === 0) {
+        alert('No QC results to export. Please run a QC audit first.');
+        return;
+      }
+
+      try {
+        // Generate CSV content
+        const csvContent = generateQCReportCSV(window.currentQCResults);
+
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+
+        link.setAttribute('href', url);
+        link.setAttribute('download', `QC_Audit_Report_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        console.log('✅ QC report exported successfully');
+
+      } catch (error) {
+        console.error('❌ Error exporting QC report:', error);
+        alert('Error exporting QC report: ' + error.message);
+      }
+    }
+
+    // Generate CSV content for QC report
+    function generateQCReportCSV(qcResults) {
+      const headers = [
+        'Trial ID',
+        'Error Type',
+        'Severity',
+        'Field',
+        'Location',
+        'Message',
+        'Suggestion',
+        'Audit Date'
+      ];
+
+      let csvContent = headers.join(',') + '\n';
+
+      qcResults.forEach(result => {
+        const row = [
+          `"${result.trial_id}"`,
+          `"${formatErrorType(result.error_type)}"`,
+          `"${result.severity.toUpperCase()}"`,
+          `"${result.field}"`,
+          `"${result.location}"`,
+          `"${result.message.replace(/"/g, '""')}"`,
+          `"${result.suggestion.replace(/"/g, '""')}"`,
+          `"${new Date().toISOString()}"`
+        ];
+        csvContent += row.join(',') + '\n';
+      });
+
+      return csvContent;
+    }
+
+    // Store QC results globally for export
+    function storeQCResults(results) {
+      window.currentQCResults = results;
+    }
+
+    // Initialize QC audit functionality
+    function initializeQCAudit() {
+      console.log('🚀 Initializing QC Audit functionality...');
+
+      // QC Audit button
+      const qcAuditBtn = document.getElementById('qcAuditBtn');
+      if (qcAuditBtn) {
+        qcAuditBtn.removeEventListener('click', runQCAudit);
+        qcAuditBtn.addEventListener('click', runQCAudit);
+        console.log('✅ QC Audit button listener added');
+      }
+
+      // QC filter controls
+      const qcErrorType = document.getElementById('qcErrorType');
+      const qcSeverity = document.getElementById('qcSeverity');
+      const qcTrialFilter = document.getElementById('qcTrialFilter');
+
+      if (qcErrorType) {
+        qcErrorType.removeEventListener('change', filterQCResults);
+        qcErrorType.addEventListener('change', filterQCResults);
+      }
+
+      if (qcSeverity) {
+        qcSeverity.removeEventListener('change', filterQCResults);
+        qcSeverity.addEventListener('change', filterQCResults);
+      }
+
+      if (qcTrialFilter) {
+        qcTrialFilter.removeEventListener('input', filterQCResults);
+        qcTrialFilter.addEventListener('input', filterQCResults);
+      }
+
+      // Export button
+      const exportQcReport = document.getElementById('exportQcReport');
+      if (exportQcReport) {
+        exportQcReport.removeEventListener('click', exportQCReport);
+        exportQcReport.addEventListener('click', exportQCReport);
+        console.log('✅ QC Export button listener added');
+      }
+
+      console.log('✅ QC Audit initialization complete');
+    }
+
+    // === ADMIN EXPORT FUNCTIONS ===
+
+    // Global variable to store current search results for export
+    window.currentSearchResults = [];
+
+    // Export all trials with comprehensive data
+    async function exportAllTrials(format = 'csv') {
+      console.log(`📊 Starting full trial export in ${format.toUpperCase()} format...`);
+
+      try {
+        updateExportStatus('Preparing export...', 0);
+
+        // Get all trials from Firestore
+        const trialsSnapshot = await db.collection('trials').get();
+        updateExportStatus('Loading trial data...', 20);
+
+        const allTrialsData = [];
+        let processedCount = 0;
+
+        for (const doc of trialsSnapshot.docs) {
+          const trial = doc.data();
+          const trialId = doc.id;
+
+          // Get comprehensive trial data including related collections
+          const comprehensiveData = await getComprehensiveTrialData(trialId, trial);
+          allTrialsData.push(comprehensiveData);
+
+          processedCount++;
+          const progress = 20 + (processedCount / trialsSnapshot.size) * 60;
+          updateExportStatus(`Processing trial ${processedCount}/${trialsSnapshot.size}...`, progress);
+        }
+
+        updateExportStatus('Generating export file...', 85);
+
+        // Generate and download file
+        if (format === 'csv') {
+          await downloadCSV(allTrialsData, 'Full_Trials_Export');
+        } else if (format === 'json') {
+          await downloadJSON(allTrialsData, 'Full_Trials_Export');
+        }
+
+        updateExportStatus(`✅ Export completed! ${allTrialsData.length} trials exported.`, 100);
+
+        // Log export activity
+        await logAuditTrail('EXPORT', 'admin', 'full_trial_export_' + Date.now(), null, {
+          export_type: 'full_trials',
+          format: format,
+          total_trials: allTrialsData.length
+        }, {
+          export_action: true,
+          admin_action: true
+        });
+
+        setTimeout(() => {
+          resetExportStatus();
+        }, 3000);
+
+      } catch (error) {
+        console.error('❌ Error exporting all trials:', error);
+        updateExportStatus(`❌ Export failed: ${error.message}`, 0);
+        setTimeout(() => {
+          resetExportStatus();
+        }, 5000);
+      }
+    }
+
+    // Export current search results
+    async function exportSearchResults(format = 'csv') {
+      console.log(`📊 Starting search results export in ${format.toUpperCase()} format...`);
+
+      try {
+        if (!window.currentSearchResults || window.currentSearchResults.length === 0) {
+          alert('No search results to export. Please perform a search first.');
+          return;
+        }
+
+        updateExportStatus('Preparing search results export...', 0);
+
+        const searchData = [];
+        let processedCount = 0;
+
+        for (const trial of window.currentSearchResults) {
+          // Get comprehensive data if option is selected
+          const includeRelated = document.getElementById('includeRelatedData').checked;
+
+          let exportData;
+          if (includeRelated) {
+            exportData = await getComprehensiveTrialData(trial.id, trial);
+          } else {
+            exportData = trial;
+          }
+
+          searchData.push(exportData);
+
+          processedCount++;
+          const progress = (processedCount / window.currentSearchResults.length) * 80;
+          updateExportStatus(`Processing trial ${processedCount}/${window.currentSearchResults.length}...`, progress);
+        }
+
+        updateExportStatus('Generating export file...', 85);
+
+        // Generate and download file
+        if (format === 'csv') {
+          await downloadCSV(searchData, 'Search_Results_Export');
+        } else if (format === 'json') {
+          await downloadJSON(searchData, 'Search_Results_Export');
+        }
+
+        updateExportStatus(`✅ Export completed! ${searchData.length} trials exported.`, 100);
+
+        // Log export activity
+        await logAuditTrail('EXPORT', 'admin', 'search_results_export_' + Date.now(), null, {
+          export_type: 'search_results',
+          format: format,
+          total_trials: searchData.length
+        }, {
+          export_action: true,
+          admin_action: true
+        });
+
+        setTimeout(() => {
+          resetExportStatus();
+        }, 3000);
+
+      } catch (error) {
+        console.error('❌ Error exporting search results:', error);
+        updateExportStatus(`❌ Export failed: ${error.message}`, 0);
+        setTimeout(() => {
+          resetExportStatus();
+        }, 5000);
+      }
+    }
+
+    // Get comprehensive trial data including all related collections
+    async function getComprehensiveTrialData(trialId, baseTrialData) {
+      const comprehensiveData = { ...baseTrialData };
+
+      try {
+        // Get trial ARMs
+        const armsSnapshot = await db.collection('trial_arms').where('trial_id', '==', trialId).get();
+        comprehensiveData.arms = [];
+        armsSnapshot.forEach(doc => {
+          comprehensiveData.arms.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get patient demographics
+        const demoSnapshot = await db.collection('patient_demographics').where('trial_id', '==', trialId).get();
+        comprehensiveData.demographics = [];
+        demoSnapshot.forEach(doc => {
+          comprehensiveData.demographics.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get outcomes
+        const outcomesSnapshot = await db.collection('trial_outcomes').where('trial_id', '==', trialId).get();
+        comprehensiveData.outcomes = [];
+        outcomesSnapshot.forEach(doc => {
+          comprehensiveData.outcomes.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get survival data
+        const survivalSnapshot = await db.collection('survival_data').where('trial_id', '==', trialId).get();
+        comprehensiveData.survival_data = [];
+        survivalSnapshot.forEach(doc => {
+          comprehensiveData.survival_data.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get safety assessments
+        const safetySnapshot = await db.collection('safety_assessments').where('trial_id', '==', trialId).get();
+        comprehensiveData.safety_assessments = [];
+        safetySnapshot.forEach(doc => {
+          comprehensiveData.safety_assessments.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get response assessments
+        const responseSnapshot = await db.collection('response_assessments').where('trial_id', '==', trialId).get();
+        comprehensiveData.response_assessments = [];
+        responseSnapshot.forEach(doc => {
+          comprehensiveData.response_assessments.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get milestones
+        const milestonesSnapshot = await db.collection('trial_milestones').where('trial_id', '==', trialId).get();
+        comprehensiveData.milestones = [];
+        milestonesSnapshot.forEach(doc => {
+          comprehensiveData.milestones.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get references
+        const referencesSnapshot = await db.collection('trial_references').where('trial_id', '==', trialId).get();
+        comprehensiveData.references = [];
+        referencesSnapshot.forEach(doc => {
+          comprehensiveData.references.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Get commentary
+        const commentarySnapshot = await db.collection('trial_commentary').where('trial_id', '==', trialId).get();
+        comprehensiveData.commentary = [];
+        commentarySnapshot.forEach(doc => {
+          comprehensiveData.commentary.push({ id: doc.id, ...doc.data() });
+        });
+
+        // Include audit trail if requested
+        if (document.getElementById('includeAuditTrail').checked) {
+          const auditSnapshot = await db.collection('audit_trail').where('trial_id', '==', trialId).get();
+          comprehensiveData.audit_trail = [];
+          auditSnapshot.forEach(doc => {
+            comprehensiveData.audit_trail.push({ id: doc.id, ...doc.data() });
+          });
+        }
+
+        // Add metadata if requested
+        if (document.getElementById('includeMetadata').checked) {
+          comprehensiveData.export_metadata = {
+            export_date: new Date().toISOString(),
+            export_user: JSON.parse(localStorage.getItem('currentUser') || '{}').username,
+            total_related_records: {
+              arms: comprehensiveData.arms.length,
+              demographics: comprehensiveData.demographics.length,
+              outcomes: comprehensiveData.outcomes.length,
+              survival_data: comprehensiveData.survival_data.length,
+              safety_assessments: comprehensiveData.safety_assessments.length,
+              response_assessments: comprehensiveData.response_assessments.length,
+              milestones: comprehensiveData.milestones.length,
+              references: comprehensiveData.references.length,
+              commentary: comprehensiveData.commentary.length
+            }
+          };
+        }
+
+      } catch (error) {
+        console.error('Error getting comprehensive trial data:', error);
+        comprehensiveData.export_error = error.message;
+      }
+
+      return comprehensiveData;
+    }
+
+    // Download data as CSV
+    async function downloadCSV(data, filename) {
+      const csvContent = generateTrialCSV(data);
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      downloadFile(blob, `${filename}_${new Date().toISOString().split('T')[0]}.csv`);
+    }
+
+    // Download data as JSON
+    async function downloadJSON(data, filename) {
+      const jsonContent = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+      downloadFile(blob, `${filename}_${new Date().toISOString().split('T')[0]}.json`);
+    }
+
+    // Generic file download function
+    function downloadFile(blob, filename) {
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+    }
+
+    // Generate comprehensive CSV for trial data
+    function generateTrialCSV(trialsData) {
+      if (!trialsData || trialsData.length === 0) {
+        return 'No data available for export';
+      }
+
+      // Define main trial headers
+      const mainHeaders = [
+        'Trial ID', 'Title', 'Phase', 'Status', 'Sponsor', 'Study Type',
+        'Indication(s)', 'Product', 'Biomarkers', 'Primary Endpoint',
+        'Secondary Endpoint', 'Start Date', 'End Date', 'Created By',
+        'Created At', 'Last Updated By', 'Last Updated At', 'Source Link'
+      ];
+
+      let csvContent = mainHeaders.join(',') + '\n';
+
+      trialsData.forEach(trial => {
+        const row = [
+          `"${trial.id || ''}"`,
+          `"${(trial.title || '').replace(/"/g, '""')}"`,
+          `"${trial.phase || ''}"`,
+          `"${trial.status || ''}"`,
+          `"${trial.sponsor || ''}"`,
+          `"${trial.study_type || ''}"`,
+          `"${Array.isArray(trial.indication) ? trial.indication.join('; ') : (trial.indication || '')}"`,
+          `"${Array.isArray(trial.product_tags) ? trial.product_tags.join('; ') : (trial.product_tags || '')}"`,
+          `"${Array.isArray(trial.biomarkers) ? trial.biomarkers.join('; ') : (trial.biomarkers || '')}"`,
+          `"${(trial.primary_endpoint || '').replace(/"/g, '""')}"`,
+          `"${(trial.secondary_endpoint || '').replace(/"/g, '""')}"`,
+          `"${trial.start_date || ''}"`,
+          `"${trial.end_date || ''}"`,
+          `"${trial.created_by || ''}"`,
+          `"${trial.created_at || ''}"`,
+          `"${trial.last_updated_by || ''}"`,
+          `"${trial.last_updated_at || ''}"`,
+          `"${trial.source_link || ''}"`
+        ];
+        csvContent += row.join(',') + '\n';
+
+        // Add related data if available
+        if (trial.arms && trial.arms.length > 0) {
+          csvContent += '\n--- TRIAL ARMS ---\n';
+          csvContent += 'ARM Type,ARM Name,Description,Dosage,Schedule,N,Created By,Created At\n';
+          trial.arms.forEach(arm => {
+            const armRow = [
+              `"${arm.arm_type || ''}"`,
+              `"${arm.arm_name || ''}"`,
+              `"${(arm.description || '').replace(/"/g, '""')}"`,
+              `"${arm.dosage || ''}"`,
+              `"${arm.schedule || ''}"`,
+              `"${arm.n || ''}"`,
+              `"${arm.created_by || ''}"`,
+              `"${arm.created_at || ''}"`
+            ];
+            csvContent += armRow.join(',') + '\n';
+          });
+        }
+
+        if (trial.demographics && trial.demographics.length > 0) {
+          csvContent += '\n--- PATIENT DEMOGRAPHICS ---\n';
+          csvContent += 'Category,Value,Source,Source Link,Created By,Created At\n';
+          trial.demographics.forEach(demo => {
+            const demoRow = [
+              `"${demo.category || ''}"`,
+              `"${(demo.value || '').replace(/"/g, '""')}"`,
+              `"${demo.source || ''}"`,
+              `"${demo.source_link || ''}"`,
+              `"${demo.created_by || ''}"`,
+              `"${demo.created_at || ''}"`
+            ];
+            csvContent += demoRow.join(',') + '\n';
+          });
+        }
+
+        csvContent += '\n'; // Separator between trials
+      });
+
+      return csvContent;
+    }
+
+    // Update export status and progress
+    function updateExportStatus(message, progress) {
+      const statusElement = document.getElementById('exportStatus');
+      const progressElement = document.getElementById('exportProgress');
+      const progressBar = document.getElementById('exportProgressBar');
+      const progressText = document.getElementById('exportProgressText');
+
+      if (statusElement) {
+        statusElement.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i>${message}`;
+      }
+
+      if (progressElement && progress > 0) {
+        progressElement.classList.remove('hidden');
+        if (progressBar) {
+          progressBar.style.width = `${progress}%`;
+        }
+        if (progressText) {
+          progressText.textContent = `${Math.round(progress)}% complete`;
+        }
+      }
+    }
+
+    // Reset export status
+    function resetExportStatus() {
+      const statusElement = document.getElementById('exportStatus');
+      const progressElement = document.getElementById('exportProgress');
+
+      if (statusElement) {
+        statusElement.innerHTML = '<i class="fas fa-info-circle mr-1"></i>Ready to export';
+      }
+
+      if (progressElement) {
+        progressElement.classList.add('hidden');
+      }
+    }
+
+    // Initialize export functionality
+    function initializeExportFunctionality() {
+      console.log('🚀 Initializing export functionality...');
+
+      // Full trial export buttons
+      const exportAllTrialsCSV = document.getElementById('exportAllTrialsCSV');
+      const exportAllTrialsJSON = document.getElementById('exportAllTrialsJSON');
+
+      if (exportAllTrialsCSV) {
+        exportAllTrialsCSV.addEventListener('click', () => exportAllTrials('csv'));
+      }
+
+      if (exportAllTrialsJSON) {
+        exportAllTrialsJSON.addEventListener('click', () => exportAllTrials('json'));
+      }
+
+      // Search results export buttons
+      const exportSearchCSV = document.getElementById('exportSearchCSV');
+      const exportSearchJSON = document.getElementById('exportSearchJSON');
+
+      if (exportSearchCSV) {
+        exportSearchCSV.addEventListener('click', () => exportSearchResults('csv'));
+      }
+
+      if (exportSearchJSON) {
+        exportSearchJSON.addEventListener('click', () => exportSearchResults('json'));
+      }
+
+      console.log('✅ Export functionality initialized');
+    }
+
+    // Update search results storage for export
+    function updateSearchResultsForExport(trials) {
+      window.currentSearchResults = trials;
+      console.log(`📊 Updated search results for export: ${trials.length} trials`);
+    }
+
     // === ENHANCED DROPDOWN MANAGEMENT FUNCTIONS ===
 
     // Collection mapping for separate Firestore collections
@@ -9057,21 +10571,46 @@ async function loadTrialDetails(trialId) {
 
     // Initialize enhanced dropdown management
     function initializeEnhancedDropdownManagement() {
+      console.log('🚀 Initializing Enhanced Dropdown Management...');
+
       const categorySelect = document.getElementById('dropdownCategory');
       const addForm = document.getElementById('addDropdownOptionForm');
       const searchInput = document.getElementById('optionsSearch');
 
+      console.log('🔍 Found elements:', {
+        categorySelect: !!categorySelect,
+        addForm: !!addForm,
+        searchInput: !!searchInput
+      });
+
       if (categorySelect) {
+        // Remove existing listeners to prevent duplicates
+        categorySelect.removeEventListener('change', loadEnhancedDropdownOptions);
         categorySelect.addEventListener('change', loadEnhancedDropdownOptions);
+        console.log('✅ Category select listener added');
+      } else {
+        console.error('❌ Category select element not found');
       }
 
       if (addForm) {
+        // Remove existing listeners to prevent duplicates
+        addForm.removeEventListener('submit', addEnhancedDropdownOption);
         addForm.addEventListener('submit', addEnhancedDropdownOption);
+        console.log('✅ Add form listener added');
+      } else {
+        console.error('❌ Add form element not found');
       }
 
       if (searchInput) {
-        searchInput.addEventListener('input', filterDropdownOptions);
+        // Remove existing listeners to prevent duplicates
+        searchInput.removeEventListener('input', debouncedFilterDropdownOptions);
+        searchInput.addEventListener('input', debouncedFilterDropdownOptions);
+        console.log('✅ Search input listener added');
+      } else {
+        console.error('❌ Search input element not found');
       }
+
+      console.log('✅ Enhanced Dropdown Management initialization complete');
     }
 
     // Load dropdown options for selected category with search
@@ -9080,33 +10619,47 @@ async function loadTrialDetails(trialId) {
       const optionsList = document.getElementById('optionsList');
       const synonymsField = document.getElementById('synonymsField');
 
+      console.log('🔧 Loading enhanced dropdown options for category:', category);
+
       if (!category) {
         optionsList.innerHTML = '<p class="text-gray-500 italic">Select a category to view options</p>';
-        synonymsField.classList.add('hidden');
+        if (synonymsField) synonymsField.classList.add('hidden');
         return;
       }
 
       // Show synonyms field only for product_list
-      if (category === 'product_list') {
-        synonymsField.classList.remove('hidden');
-      } else {
-        synonymsField.classList.add('hidden');
+      if (synonymsField) {
+        if (category === 'product_list') {
+          synonymsField.classList.remove('hidden');
+        } else {
+          synonymsField.classList.add('hidden');
+        }
       }
 
       try {
         optionsList.innerHTML = '<p class="text-gray-500">Loading options...</p>';
 
         const collectionName = DROPDOWN_COLLECTIONS[category];
-        console.log(`Loading from collection: ${collectionName}`);
+        console.log(`📊 Loading from collection: ${collectionName} for category: ${category}`);
+
+        if (!collectionName) {
+          throw new Error(`No collection mapping found for category: ${category}`);
+        }
 
         const snapshot = await db.collection(collectionName).orderBy('value', 'asc').get();
 
         if (snapshot.empty) {
-          console.log(`Collection ${collectionName} is empty, initializing defaults`);
+          console.log(`📝 Collection ${collectionName} is empty, initializing defaults for ${category}`);
+          optionsList.innerHTML = '<p class="text-blue-600">Initializing default options...</p>';
+
           // Initialize with default options if collection doesn't exist
           await initializeEnhancedDefaultOptions(category);
+
           // Reload after initialization
-          setTimeout(() => loadEnhancedDropdownOptions(), 1000);
+          setTimeout(() => {
+            console.log('🔄 Reloading after initialization...');
+            loadEnhancedDropdownOptions();
+          }, 1000);
           return;
         }
 
@@ -9116,19 +10669,34 @@ async function loadTrialDetails(trialId) {
           window.currentDropdownOptions.push(option);
         });
 
-        console.log(`Loaded ${window.currentDropdownOptions.length} options for ${category}`);
-        displayDropdownOptions(window.currentDropdownOptions);
+        console.log(`✅ Loaded ${window.currentDropdownOptions.length} options for ${category}:`, window.currentDropdownOptions);
+
+        // Clear search input when loading new category
+        const searchInput = document.getElementById('optionsSearch');
+        if (searchInput) {
+          searchInput.value = '';
+        }
+
+        displayEnhancedDropdownOptions(window.currentDropdownOptions);
 
       } catch (error) {
-        console.error('Error loading dropdown options:', error);
-        optionsList.innerHTML = '<p class="text-red-500">Error loading options: ' + error.message + '</p>';
+        console.error('❌ Error loading dropdown options:', error);
+        optionsList.innerHTML = `<p class="text-red-500">Error loading options: ${error.message}</p>`;
       }
     }
 
-    // Display dropdown options with search filtering
-    function displayDropdownOptions(options) {
+    // Display enhanced dropdown management options with search filtering
+    function displayEnhancedDropdownOptions(options) {
       const optionsList = document.getElementById('optionsList');
-      const category = document.getElementById('dropdownCategory').value;
+      const categorySelect = document.getElementById('dropdownCategory');
+
+      if (!optionsList) {
+        console.error('❌ Options list element not found');
+        return;
+      }
+
+      const category = categorySelect ? categorySelect.value : '';
+      console.log(`📋 Displaying ${options ? options.length : 0} options for category: ${category}`);
 
       if (!options || options.length === 0) {
         optionsList.innerHTML = '<p class="text-gray-500 italic">No options found for this category</p>';
@@ -9164,12 +10732,25 @@ async function loadTrialDetails(trialId) {
 
     // Filter dropdown options based on search
     function filterDropdownOptions() {
-      const searchTerm = document.getElementById('optionsSearch').value.toLowerCase();
+      const searchInput = document.getElementById('optionsSearch');
+      const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-      if (!window.currentDropdownOptions) return;
+      console.log('🔍 Filtering options with search term:', searchTerm);
+
+      if (!window.currentDropdownOptions) {
+        console.log('❌ No current dropdown options available');
+        return;
+      }
+
+      // If search term is empty, show all options
+      if (!searchTerm) {
+        console.log('📋 Showing all options (empty search)');
+        displayEnhancedDropdownOptions(window.currentDropdownOptions);
+        return;
+      }
 
       const filteredOptions = window.currentDropdownOptions.filter(option => {
-        const value = option.value.toLowerCase();
+        const value = option.value ? option.value.toLowerCase() : '';
 
         // Check value
         if (value.includes(searchTerm)) return true;
@@ -9184,7 +10765,15 @@ async function loadTrialDetails(trialId) {
         return false;
       });
 
-      displayDropdownOptions(filteredOptions);
+      console.log(`🎯 Found ${filteredOptions.length} matching options`);
+      displayEnhancedDropdownOptions(filteredOptions);
+    }
+
+    // Debounced version of filterDropdownOptions for better performance
+    let filterTimeout;
+    function debouncedFilterDropdownOptions() {
+      clearTimeout(filterTimeout);
+      filterTimeout = setTimeout(filterDropdownOptions, 300);
     }
 
     // Add new dropdown option to separate collection
@@ -9656,7 +11245,7 @@ async function loadTrialDetails(trialId) {
 
     // Initialize searchable dropdowns for products and indications
     function initializeSearchableDropdowns() {
-      // Initialize product tag dropdowns
+      // Initialize product dropdowns
       document.querySelectorAll('.product-tag-selector').forEach(selector => {
         initializeProductDropdown(selector);
       });
@@ -9670,9 +11259,21 @@ async function loadTrialDetails(trialId) {
     // Initialize product dropdown with search and selection
     async function initializeProductDropdown(selector) {
       const searchInput = selector.querySelector('.product-search-input');
-      const hiddenInput = selector.querySelector('input[name="product_tag"]');
+      // Handle both naming conventions: product_tag (add form) and product_tags (summary form)
+      const hiddenInput = selector.querySelector('input[name="product_tag"]') || selector.querySelector('input[name="product_tags"]');
       const dropdownList = selector.querySelector('.dropdown-list');
       const toggleBtn = selector.querySelector('.dropdown-toggle');
+
+      // Validate required elements
+      if (!searchInput || !hiddenInput || !dropdownList || !toggleBtn) {
+        console.error('Product dropdown initialization failed - missing elements:', {
+          searchInput: !!searchInput,
+          hiddenInput: !!hiddenInput,
+          dropdownList: !!dropdownList,
+          toggleBtn: !!toggleBtn
+        });
+        return;
+      }
 
       let products = [];
 
@@ -9693,22 +11294,42 @@ async function loadTrialDetails(trialId) {
             products.push(product);
           });
         }
+        console.log(`✅ Loaded ${products.length} products for dropdown`);
       } catch (error) {
         console.error('Error loading products:', error);
       }
 
-      // Search functionality
+      // Search functionality with debouncing
+      let searchTimeout;
       searchInput.addEventListener('input', () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        const filteredProducts = products.filter(product =>
-          (product.label || product.value).toLowerCase().includes(searchTerm)
-        );
-        displayDropdownOptions(dropdownList, filteredProducts, (product) => {
-          searchInput.value = product.label || product.value;
-          hiddenInput.value = product.value;
-          dropdownList.classList.add('hidden');
-        });
-        dropdownList.classList.remove('hidden');
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          const searchTerm = searchInput.value.toLowerCase();
+          const filteredProducts = products.filter(product =>
+            (product.label || product.value).toLowerCase().includes(searchTerm) ||
+            (product.synonyms && product.synonyms.some(synonym =>
+              synonym.toLowerCase().includes(searchTerm)
+            ))
+          );
+          displayDropdownOptions(dropdownList, filteredProducts, (product) => {
+            searchInput.value = product.label || product.value;
+            hiddenInput.value = product.value;
+            dropdownList.classList.add('hidden');
+            // Add visual feedback for selection
+            searchInput.classList.add('border-green-500');
+            setTimeout(() => {
+              searchInput.classList.remove('border-green-500');
+            }, 1000);
+            // Show tag indicator if available
+            const tagIndicator = selector.querySelector('.tag-indicator');
+            if (tagIndicator && product.value) {
+              tagIndicator.classList.remove('hidden');
+            }
+          });
+          if (searchInput.value.length > 0) {
+            dropdownList.classList.remove('hidden');
+          }
+        }, 150);
       });
 
       // Toggle dropdown
@@ -9718,6 +11339,11 @@ async function loadTrialDetails(trialId) {
             searchInput.value = product.label || product.value;
             hiddenInput.value = product.value;
             dropdownList.classList.add('hidden');
+            // Show tag indicator if available
+            const tagIndicator = selector.querySelector('.tag-indicator');
+            if (tagIndicator && product.value) {
+              tagIndicator.classList.remove('hidden');
+            }
           });
           dropdownList.classList.remove('hidden');
         } else {
@@ -9749,6 +11375,17 @@ async function loadTrialDetails(trialId) {
       const dropdownList = selector.querySelector('.dropdown-list');
       const toggleBtn = selector.querySelector('.dropdown-toggle');
 
+      // Validate required elements
+      if (!searchInput || !hiddenInput || !dropdownList || !toggleBtn) {
+        console.error('Indication dropdown initialization failed - missing elements:', {
+          searchInput: !!searchInput,
+          hiddenInput: !!hiddenInput,
+          dropdownList: !!dropdownList,
+          toggleBtn: !!toggleBtn
+        });
+        return;
+      }
+
       let indications = [];
 
       // Load indications from Firestore
@@ -9768,22 +11405,42 @@ async function loadTrialDetails(trialId) {
             indications.push(indication);
           });
         }
+        console.log(`✅ Loaded ${indications.length} indications for dropdown`);
       } catch (error) {
         console.error('Error loading indications:', error);
       }
 
-      // Search functionality
+      // Search functionality with debouncing
+      let searchTimeout;
       searchInput.addEventListener('input', () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        const filteredIndications = indications.filter(indication =>
-          (indication.label || indication.value).toLowerCase().includes(searchTerm)
-        );
-        displayDropdownOptions(dropdownList, filteredIndications, (indication) => {
-          searchInput.value = indication.label || indication.value;
-          hiddenInput.value = indication.value;
-          dropdownList.classList.add('hidden');
-        });
-        dropdownList.classList.remove('hidden');
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          const searchTerm = searchInput.value.toLowerCase();
+          const filteredIndications = indications.filter(indication =>
+            (indication.label || indication.value).toLowerCase().includes(searchTerm) ||
+            (indication.synonyms && indication.synonyms.some(synonym =>
+              synonym.toLowerCase().includes(searchTerm)
+            ))
+          );
+          displayDropdownOptions(dropdownList, filteredIndications, (indication) => {
+            searchInput.value = indication.label || indication.value;
+            hiddenInput.value = indication.value;
+            dropdownList.classList.add('hidden');
+            // Add visual feedback for selection
+            searchInput.classList.add('border-green-500');
+            setTimeout(() => {
+              searchInput.classList.remove('border-green-500');
+            }, 1000);
+            // Show tag indicator if available
+            const tagIndicator = selector.querySelector('.tag-indicator');
+            if (tagIndicator && indication.value) {
+              tagIndicator.classList.remove('hidden');
+            }
+          });
+          if (searchInput.value.length > 0) {
+            dropdownList.classList.remove('hidden');
+          }
+        }, 150);
       });
 
       // Toggle dropdown
@@ -9793,6 +11450,11 @@ async function loadTrialDetails(trialId) {
             searchInput.value = indication.label || indication.value;
             hiddenInput.value = indication.value;
             dropdownList.classList.add('hidden');
+            // Show tag indicator if available
+            const tagIndicator = selector.querySelector('.tag-indicator');
+            if (tagIndicator && indication.value) {
+              tagIndicator.classList.remove('hidden');
+            }
           });
           dropdownList.classList.remove('hidden');
         } else {
@@ -9825,26 +11487,44 @@ async function loadTrialDetails(trialId) {
       }
 
       let html = '';
-      options.forEach(option => {
+      options.forEach((option, index) => {
         html += `
-          <div class="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
-               data-value="${option.value}">
-            <div class="font-medium">${option.label || option.value}</div>
-            ${option.description ? `<div class="text-gray-500 text-xs">${option.description}</div>` : ''}
+          <div class="px-3 py-2 hover:bg-blue-100 active:bg-blue-200 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+               data-value="${option.value}" data-index="${index}">
+            <div class="font-medium text-gray-800">${option.label || option.value}</div>
+            ${option.description ? `<div class="text-gray-500 text-xs mt-1">${option.description}</div>` : ''}
           </div>
         `;
       });
 
       dropdownList.innerHTML = html;
 
-      // Add click handlers
+      // Add click handlers with better feedback
       dropdownList.querySelectorAll('[data-value]').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Add visual feedback
+          item.classList.add('bg-blue-200');
+          setTimeout(() => {
+            item.classList.remove('bg-blue-200');
+          }, 150);
+
           const value = item.getAttribute('data-value');
           const option = options.find(opt => opt.value === value);
           if (option && onSelect) {
             onSelect(option);
           }
+        });
+
+        // Add hover effects
+        item.addEventListener('mouseenter', () => {
+          item.classList.add('bg-blue-50');
+        });
+
+        item.addEventListener('mouseleave', () => {
+          item.classList.remove('bg-blue-50');
         });
       });
     }
@@ -11039,10 +12719,31 @@ async function loadTrialDetails(trialId) {
       alert('CSV export functionality would be implemented here');
     }
 
+    // Handle browser back/forward buttons and direct URL access
+    window.addEventListener('hashchange', function() {
+      console.log('📱 Hash changed, restoring page state');
+      if (localStorage.getItem('isLoggedIn') === 'true') {
+        restorePageState();
+      }
+    });
+
+    // Handle page refresh and direct URL access
+    window.addEventListener('load', function() {
+      console.log('📱 Page loaded, checking for state restoration');
+      if (localStorage.getItem('isLoggedIn') === 'true') {
+        setTimeout(() => {
+          restorePageState();
+        }, 1500);
+      }
+    });
+
     // Initialize audit trail functionality when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
       // Set up simple page navigation
       setupSimplePageNavigation();
+
+      // Initialize export functionality
+      initializeExportFunctionality();
 
       // Initialize searchable dropdowns
       setTimeout(() => {
@@ -11066,6 +12767,7 @@ async function loadTrialDetails(trialId) {
           auditTrailModal.classList.remove('hidden');
           loadAuditTrailData();
           initializeEnhancedDropdownManagement();
+          initializeQCAudit();
         });
       }
 
@@ -11152,5 +12854,6 @@ async function loadTrialDetails(trialId) {
     });
   </script>
 </body>
-</html>< ! - -   r e b u i l d   - - >  
+</html>< ! - -   r e b u i l d   - - > 
+ 
  
